@@ -29,14 +29,44 @@ namespace BlueService.Models
         public List<Product> GetFavoriteProducts()
         {
             BlueServiceDataContext dc = new Models.BlueServiceDataContext();
-            return dc.UserFavoriteProducts.Where(u => u.Id == this.Id).Select(u => u.Product).ToList();
+            return dc.UserFavoriteProducts.Where(u => u.User.Id == this.Id).Select(u => u.Product).ToList();
         }
-        public void AddFavoriteProduct(Product product)
+        public void AddFavoriteProduct(int _product, BlueServiceDataContext dc)
         {
-            BlueServiceDataContext dc = new Models.BlueServiceDataContext();
-            dc.UserFavoriteProducts.Add(new UserFavoriteProduct() { User = this, Product = product });
+            var product = dc.Products.SingleOrDefault(p => p.Id == _product);
+            if (product == null) return;
+            var data = dc.UserFavoriteProducts.SingleOrDefault(uf => uf.User.Id == this.Id && uf.Product.Id == _product);
+            if(data == null)
+            {
+                dc.UserFavoriteProducts.Add(new UserFavoriteProduct() { User = this, Product = product });
+            }
+            else
+            {
+                dc.UserFavoriteProducts.Remove(data);
+            }
+           
             dc.SaveChanges();
         }
+        public List<Conversation> GetConversations()
+        {
+            BlueServiceDataContext dc = new Models.BlueServiceDataContext();
+            var data = dc.Conversations.Where(c => c.User1Id == this.Id || c.User2Id == this.Id).OrderByDescending(c => c.Date).ToList();
+            foreach (var item in data)
+            {
+                if(item.User2Id == this.Id)
+                {
+                    item.User2 = dc.Users.SingleOrDefault(u => u.Id == item.User1Id);
+                }
+                else
+                {
+                    item.User2 = dc.Users.SingleOrDefault(u => u.Id == item.User2Id);
+                }
+               
+            }
+            return data;
+        }
+        
+
 
 
     }

@@ -15,7 +15,6 @@ namespace BlueService.Models
         public virtual User User { get; set; }
         public string Title { get; set; }
         public double Price { get; set; }
-        public string Description { get; set; }
         public string ImageUrl { get; set; }
         public DateTime Date { get; set; }
         public Product()
